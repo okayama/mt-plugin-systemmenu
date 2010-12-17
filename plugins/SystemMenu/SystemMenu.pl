@@ -16,7 +16,16 @@ my $plugin = MT::Plugin::SystemMenu->new( {
     author_name => 'okayama',
     author_link => 'http://weeeblog.net/',
     version => $VERSION,
+    settings => new MT::PluginSettings( [
+        [ 'show_dashboard', { Default => 1 } ],
+        [ 'show_list_website', { Default => 1 } ],
+        [ 'show_list_user', { Default => 1 } ],
+        [ 'show_list_templates', { Default => 1 } ],
+        [ 'show_cfg_plugins', { Default => 1 } ],
+        [ 'show_view_log', { Default => 1 } ],
+    ] ),
     l10n_class => 'MT::SystemMenu::L10N',
+    system_config_template => 'systemmenu_config.tmpl',
 } );
 MT->add_plugin( $plugin );
 
@@ -34,20 +43,30 @@ sub _cb_ts_header {
     my ( $cb, $app, $tmpl ) = @_;
     my $transform = 0;
     my $list;
-    if ( $app->user->can_do( 'create_website' ) ) {
-        $list .= '<li><a href="<$mt:var name="mt_url">?__mode=list_website&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Websites"></a></li>' . "\n";
+    if ( $plugin->get_config_value( 'show_list_website' ) ) {
+        if ( $app->user->can_do( 'create_website' ) ) {
+            $list .= '<li><a href="<$mt:var name="mt_url">?__mode=list_website&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Websites"></a></li>' . "\n";
+        }
     }
-    if ( $app->user->is_superuser ) {
-        $list .= '<li><a href="<$mt:var name="mt_url">?__mode=list_author&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Users"></a></li>' . "\n";
+    if ( $plugin->get_config_value( 'show_list_user' ) ) {
+        if ( $app->user->is_superuser ) {
+            $list .= '<li><a href="<$mt:var name="mt_url">?__mode=list_author&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Users"></a></li>' . "\n";
+        }
     }
-    if ( $app->user->can_do( 'edit_templates' ) ) {
-        $list .= '<li><a href="<$mt:var name="mt_url">?__mode=list_template&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Templates"></a></li>' . "\n";
+    if ( $plugin->get_config_value( 'show_list_templates' ) ) {
+        if ( $app->user->can_do( 'edit_templates' ) ) {
+            $list .= '<li><a href="<$mt:var name="mt_url">?__mode=list_template&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Templates"></a></li>' . "\n";
+        }
     }
-    if ( $app->user->can_manage_plugins ) {
-        $list .= '<li><a href="<$mt:var name="mt_url">?__mode=cfg_plugins&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Plugins"></a></li>' . "\n";
+    if ( $plugin->get_config_value( 'show_cfg_plugins' ) ) {
+        if ( $app->user->can_manage_plugins ) {
+            $list .= '<li><a href="<$mt:var name="mt_url">?__mode=cfg_plugins&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Plugins"></a></li>' . "\n";
+        }
     }
-    if ( $app->user->can_view_log ) {
-        $list .= '<li><a href="<$mt:var name="mt_url">?__mode=view_log&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="System Activity Feed"></a></li>' . "\n";
+    if ( $plugin->get_config_value( 'show_view_log' ) ) {
+        if ( $app->user->can_view_log ) {
+            $list .= '<li><a href="<$mt:var name="mt_url">?__mode=view_log&amp;blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="System Activity Feed"></a></li>' . "\n";
+        }
     }
     if ( $list ) {
         my $insert = <<'CSS';
@@ -67,8 +86,10 @@ CSS
         $insert .= '<ul id="system-menu-list">' . "\n";
         $insert .= '   <li><span class="scope-lebel"><__trans phrase="System Overview"></span>' . "\n";
         $insert .= '       <ul>' . "\n";
-        $insert .= '           <li><a href="<$mt:var name="mt_url">?blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Dashboard"></a></li>' . "\n";
-        $insert .= $list;        
+        if ( $plugin->get_config_value( 'show_dashboard' ) ) {
+            $insert .= '           <li><a href="<$mt:var name="mt_url">?blog_id=0&amp;<$mt:var name="return_args" escape="html"$>"><__trans phrase="Dashboard"></a></li>' . "\n";
+        }
+        $insert .= $list;
         $insert .= '       </ul>' . "\n";
         $insert .= '   </li>' . "\n";
         $insert .= '</ul>' . "\n";
