@@ -1,4 +1,4 @@
-# LonelyAssets
+# SystemMenu
 A Movable Type plugin to access system menu, quickly.
 
 ## Requirements
