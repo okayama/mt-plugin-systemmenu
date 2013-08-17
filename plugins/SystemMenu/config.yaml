@@ -1,0 +1,26 @@
+id: SystemMenu
+name: SystemMenu
+key: systemmenu
+description: <__trans phrase='_PLUGIN_DESCRIPTION'>
+author_name: okayama
+author_link: http://weeeblog.net/
+version: 1.1
+settings:
+    show_dashboard:
+        default: 0
+    show_list_website:
+        default: 1
+    show_list_blog:
+        default: 1
+    show_list_user:
+        default: 0
+    show_list_templates:
+        default: 1
+    show_cfg_plugins:
+        default: 1
+    show_view_log:
+        default: 1
+l10n_class: SystemMenu::L10N
+system_config_template: systemmenu_config.tmpl
+callbacks:
+    MT::App::CMS::template_source.scope_selector: $systemmenu::SystemMenu::Callbacks::_cb_ts_header
